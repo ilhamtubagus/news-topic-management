@@ -1,0 +1,48 @@
+version: "3.7"
+services:
+  # The Go App
+  go-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: newsTopic
+    depends_on:
+      - "redis"
+      - "postgres"
+    environment:
+      - APP_PORT=${APP_PORT}
+      - DB_HOST=${DB_HOST}
+      - DB_DRIVER=${DB_DRIVER}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      # Expose port 8080
+      - "${APP_PORT}:${APP_PORT}"
+    volumes:
+      # Attach current directory into /go/src/app inside container
+      - "./:/go/src/app:cached"
+  # Redis In-Memmory DB
+  redis:
+    image: "redis:6.2.5-alpine3.14"
+    container_name: "redis"
+    ports:
+      # Expose port 7001
+      - "${REDIS_PORT}:6379"
+  # Postgres SQL DB
+  postgres:
+    image: "postgres:12.8-alpine3.14"
+    volumes:
+      - database-data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: newsTopic
+    ports:
+      - "5433:5432"
+volumes:
+  database-data:
