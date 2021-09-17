@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/ilhamtubagus/newsTags/app"
+	"github.com/ilhamtubagus/newsTags/app/dto"
 	"github.com/ilhamtubagus/newsTags/domain/entity"
 	"github.com/labstack/echo/v4"
 )
@@ -56,7 +57,7 @@ func (th *TagHandler) UpdateTag(c echo.Context) error {
 		if _, err := th.tagApp.SaveTag(tag); err != nil {
 			return echo.NewHTTPError(err.Code, err.AsMessage())
 		}
-		return c.JSON(http.StatusOK, tag)
+		return c.JSON(http.StatusOK, dto.TagDtoRes{Message: "tag updated", Tag: *tag})
 	}
 	return echo.NewHTTPError(http.StatusNotFound, "tag not found")
 }

@@ -39,10 +39,11 @@ func main() {
 	// Instantiate Apps
 	tagApp := app.TagAppImpl{TagRepo: databaseServices.TagRepository}
 	topicApp := app.TopicAppImpl{TopicRepo: databaseServices.TopicRepository}
-
+	newsApp := app.NewsAppImpl{NewsRepo: databaseServices.NewsRepository, TagRepo: databaseServices.TagRepository, TopicRepo: databaseServices.TopicRepository}
 	// Glue apps with handlers
 	tagHandler := handler.NewTagHandler(&tagApp)
 	topicHandler := handler.NewTopicHandler(&topicApp)
+	newsHandler := handler.NewNewsandler(&newsApp)
 
 	// Define routes
 	e := echo.New()
@@ -58,5 +59,7 @@ func main() {
 	e.GET("/topic/:id", topicHandler.GetTopicById)
 	e.DELETE("/topic/:id", topicHandler.DeleteTopic)
 	e.GET("/topic", topicHandler.GetAllTopic)
+	// News Routes
+	e.POST("/news", newsHandler.SaveNews)
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", os.Getenv("APP_PORT"))))
 }

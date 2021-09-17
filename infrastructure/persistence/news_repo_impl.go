@@ -1,6 +1,8 @@
 package persistence
 
 import (
+	"fmt"
+
 	"github.com/ilhamtubagus/newsTags/app/dto"
 	"github.com/ilhamtubagus/newsTags/domain/entity"
 	"gorm.io/gorm"
@@ -15,5 +17,9 @@ func NewNewsRepository(db *gorm.DB) *NewsRepoImpl {
 }
 
 func (n NewsRepoImpl) SaveNews(news *entity.News) (*entity.News, *dto.AppError) {
-	return nil, nil
+	err := n.db.Save(news).Error
+	if err != nil {
+		return nil, dto.NewUnexpectedError(fmt.Sprintf("unexpected database error [%s]", err.Error()))
+	}
+	return news, nil
 }
