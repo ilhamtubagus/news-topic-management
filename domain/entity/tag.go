@@ -8,7 +8,3 @@ type Tag struct {
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at,omitempty"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at,omitempty"`
 }
-
-func (t Tag) Validate() bool {
-	return t.Tag == ""
-}

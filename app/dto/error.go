@@ -1,4 +1,4 @@
-package value
+package dto
 
 import "net/http"
 

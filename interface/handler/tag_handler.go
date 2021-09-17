@@ -68,7 +68,7 @@ func (th *TagHandler) DeleteTag(c echo.Context) error {
 			return echo.NewHTTPError(err.Code, err.AsMessage())
 		}
 		th.tagApp.DeleteTag(tag.ID)
-		return c.JSON(http.StatusOK, "tag deleted")
+		return c.JSON(http.StatusOK, map[string]string{"message": "tag deleted"})
 	}
 	return echo.NewHTTPError(http.StatusNotFound, "tag not found")
 }

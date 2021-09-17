@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -45,18 +46,19 @@ func (th *TopicHandler) UpdateTopic(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse request body")
 	}
 	if id, err := strconv.ParseUint(c.Param("id"), 10, 32); err == nil {
-		tag, err := th.topicApp.GetTopicById(id)
+		topic, err := th.topicApp.GetTopicById(id)
 		if err != nil {
 			return echo.NewHTTPError(err.Code, err.AsMessage())
 
 		}
-		tag.Topic = t.Topic
-		if _, err := th.topicApp.SaveTopic(tag); err != nil {
+		fmt.Println("Shite")
+		topic.Topic = t.Topic
+		if _, err := th.topicApp.SaveTopic(topic); err != nil {
 			return echo.NewHTTPError(err.Code, err.AsMessage())
 		}
-		return c.JSON(http.StatusOK, tag)
+		return c.JSON(http.StatusOK, topic)
 	}
-	return echo.NewHTTPError(http.StatusNotFound, "tag not found")
+	return echo.NewHTTPError(http.StatusNotFound, "topic not found")
 }
 func (th *TopicHandler) DeleteTopic(c echo.Context) error {
 	if id, err := strconv.ParseUint(c.Param("id"), 10, 32); err == nil {
@@ -65,9 +67,9 @@ func (th *TopicHandler) DeleteTopic(c echo.Context) error {
 			return echo.NewHTTPError(err.Code, err.AsMessage())
 		}
 		th.topicApp.DeleteTopic(tag.ID)
-		return c.JSON(http.StatusOK, "tag deleted")
+		return c.JSON(http.StatusOK, map[string]string{"message": "topic deleted"})
 	}
-	return echo.NewHTTPError(http.StatusNotFound, "tag not found")
+	return echo.NewHTTPError(http.StatusNotFound, "topic not found")
 }
 
 func (th *TopicHandler) GetAllTopic(c echo.Context) error {
