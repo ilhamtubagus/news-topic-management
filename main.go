@@ -39,7 +39,7 @@ func main() {
 	}
 	// Instantiate redis cacher
 	redis := cache.NewRedisCacher(rdbClient)
-	// Instantiate Apps
+	// Instantiate apps
 	tagApp := app.TagAppImpl{TagRepo: databaseServices.TagRepository}
 	topicApp := app.TopicAppImpl{TopicRepo: databaseServices.TopicRepository}
 	newsApp := app.NewsAppImpl{NewsRepo: databaseServices.NewsRepository, TagRepo: databaseServices.TagRepository, TopicRepo: databaseServices.TopicRepository}
