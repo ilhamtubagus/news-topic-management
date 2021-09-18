@@ -45,16 +45,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Instantiate redis repositories
-	redisService := persistence.NewRedisCacher(rdbClient)
+	// Instantiate redis cacher
+	redis := persistence.NewRedisCacher(rdbClient)
 	// Instantiate Apps
 	tagApp := app.TagAppImpl{TagRepo: databaseServices.TagRepository}
 	topicApp := app.TopicAppImpl{TopicRepo: databaseServices.TopicRepository}
 	newsApp := app.NewsAppImpl{NewsRepo: databaseServices.NewsRepository, TagRepo: databaseServices.TagRepository, TopicRepo: databaseServices.TopicRepository}
 	// Glue apps with handlers
-	tagHandler := handler.NewTagHandler(&tagApp)
-	topicHandler := handler.NewTopicHandler(&topicApp)
-	newsHandler := handler.NewNewsHandler(&newsApp, redisService)
+	tagHandler := handler.NewTagHandler(&tagApp, redis)
+	topicHandler := handler.NewTopicHandler(&topicApp, redis)
+	newsHandler := handler.NewNewsHandler(&newsApp, redis)
 
 	// Define routes
 	e := echo.New()

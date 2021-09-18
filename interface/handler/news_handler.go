@@ -27,9 +27,14 @@ func (nh *NewsHandler) SaveNews(c echo.Context) error {
 	if err := c.Bind(newsDto); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse request body")
 	}
-	news, err := nh.newsApp.SaveNews(newsDto)
+	news, errApp := nh.newsApp.SaveNews(newsDto)
+	if errApp != nil {
+		return echo.NewHTTPError(errApp.Code, errApp.AsMessage())
+	}
+	// flush redis cache
+	err := nh.cacher.Flush()
 	if err != nil {
-		return echo.NewHTTPError(err.Code, err.AsMessage())
+		c.Logger().Error("unable to flush redis cache")
 	}
 	return c.JSON(http.StatusCreated, dto.NewsDtoRes{Message: "news created", News: news})
 }
@@ -45,8 +50,13 @@ func (nh *NewsHandler) GetNewsById(c echo.Context) error {
 	hashedKey := utils.MD5([]byte(key))
 	if nh.cacher.IsExist(hashedKey) {
 		val := nh.cacher.Get(hashedKey)
-		fmt.Println(val)
-		return c.JSON(200, val)
+		var news entity.News
+		err := json.Unmarshal([]byte(val.(string)), &news)
+		if err != nil {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusInternalServerError, "unexpected server error")
+		}
+		return c.JSON(http.StatusOK, dto.NewsDtoRes{Message: "list of news fetched successfully", News: &news})
 	}
 	// retrieve from database
 	news, errApp := nh.newsApp.GetNewsById(id)
@@ -58,7 +68,7 @@ func (nh *NewsHandler) GetNewsById(c echo.Context) error {
 	v, _ := json.Marshal(news)
 	err = nh.cacher.Put(hashedKey, v, 600)
 	if err != nil {
-		c.Logger().Info("unable to put news in redis cache")
+		c.Logger().Error("unable to put news in redis cache")
 	}
 	return c.JSON(http.StatusOK, dto.NewsDtoRes{Message: "news fetched successfully", News: news})
 }
@@ -89,7 +99,7 @@ func (nh *NewsHandler) GetAllNews(c echo.Context) error {
 	v, _ := json.Marshal(listOfNews)
 	err := nh.cacher.Put(hashedKey, v, 600)
 	if err != nil {
-		c.Logger().Info("unable to put list of news in redis cache")
+		c.Logger().Error("unable to put list of news in redis cache")
 	}
 	return c.JSON(http.StatusOK, dto.ListOfNewsDtoRes{Message: "list of news fetched successfully", News: listOfNews})
 }
@@ -117,7 +127,7 @@ func (nh *NewsHandler) UpdateNews(c echo.Context) error {
 	// flush redis cache
 	err = nh.cacher.Flush()
 	if err != nil {
-		c.Logger().Info("unable to put list of news in redis cache")
+		c.Logger().Error("unable to flush redis cache")
 	}
 	return c.JSON(http.StatusOK, dto.NewsDtoRes{Message: "news updated successfully", News: news})
 }
