@@ -8,7 +8,7 @@ import (
 
 	"github.com/ilhamtubagus/newsTags/app"
 	"github.com/ilhamtubagus/newsTags/domain/entity"
-	"github.com/ilhamtubagus/newsTags/infrastructure/persistence"
+	"github.com/ilhamtubagus/newsTags/infrastructure/cache"
 	"github.com/ilhamtubagus/newsTags/interface/dto"
 	"github.com/ilhamtubagus/newsTags/utils"
 	"github.com/labstack/echo/v4"
@@ -16,10 +16,10 @@ import (
 
 type TopicHandler struct {
 	topicApp app.TopicApp
-	cacher   persistence.Cacher
+	cacher   cache.Cacher
 }
 
-func NewTopicHandler(t app.TopicApp, c persistence.Cacher) *TopicHandler {
+func NewTopicHandler(t app.TopicApp, c cache.Cacher) *TopicHandler {
 	return &TopicHandler{topicApp: t, cacher: c}
 }
 func (th *TopicHandler) SaveTopic(c echo.Context) error {
@@ -86,7 +86,7 @@ func (th *TopicHandler) UpdateTopic(c echo.Context) error {
 		return echo.NewHTTPError(errApp.Code, errApp.AsMessage())
 	}
 	topic.Topic = t.Topic
-	if _, errApp := th.topicApp.SaveTopic(topic); err != nil {
+	if _, errApp := th.topicApp.SaveTopic(topic); errApp != nil {
 		return echo.NewHTTPError(errApp.Code, errApp.AsMessage())
 	}
 	// flush redis cache

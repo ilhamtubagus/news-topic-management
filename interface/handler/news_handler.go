@@ -8,7 +8,7 @@ import (
 
 	"github.com/ilhamtubagus/newsTags/app"
 	"github.com/ilhamtubagus/newsTags/domain/entity"
-	"github.com/ilhamtubagus/newsTags/infrastructure/persistence"
+	"github.com/ilhamtubagus/newsTags/infrastructure/cache"
 	"github.com/ilhamtubagus/newsTags/interface/dto"
 	"github.com/ilhamtubagus/newsTags/utils"
 	"github.com/labstack/echo/v4"
@@ -16,10 +16,10 @@ import (
 
 type NewsHandler struct {
 	newsApp app.NewsApp
-	cacher  persistence.Cacher
+	cacher  cache.Cacher
 }
 
-func NewNewsHandler(n app.NewsApp, c persistence.Cacher) *NewsHandler {
+func NewNewsHandler(n app.NewsApp, c cache.Cacher) *NewsHandler {
 	return &NewsHandler{newsApp: n, cacher: c}
 }
 func (nh *NewsHandler) SaveNews(c echo.Context) error {

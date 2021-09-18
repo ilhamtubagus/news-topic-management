@@ -1,4 +1,4 @@
-package persistence
+package cache
 
 type Cacher interface {
 	Get(key string) interface{}

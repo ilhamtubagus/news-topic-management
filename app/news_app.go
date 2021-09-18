@@ -48,6 +48,10 @@ func (n NewsAppImpl) SaveNews(newsDto *dto.NewsDto) (*entity.News, *dto.AppError
 		Topic:   topic,
 		Tags:    tags,
 	}
+	if news.Status == "published" {
+		now := time.Now()
+		news.PublishedAt = &now
+	}
 	_, err = n.NewsRepo.SaveNews(&news)
 	if err != nil {
 		return nil, err
@@ -66,7 +70,8 @@ func (n NewsAppImpl) DeleteNews(id uint64) (*entity.News, *dto.AppError) {
 	if err != nil {
 		return nil, err
 	}
-	news.DeletedAt = time.Now()
+	now := time.Now()
+	news.DeletedAt = &now
 	news.Status = "deleted"
 	news, err = n.NewsRepo.SaveNews(news)
 	if err != nil {

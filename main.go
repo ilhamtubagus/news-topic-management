@@ -7,11 +7,12 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/ilhamtubagus/newsTags/app"
+	"github.com/ilhamtubagus/newsTags/infrastructure/cache"
 	"github.com/ilhamtubagus/newsTags/infrastructure/persistence"
 	"github.com/ilhamtubagus/newsTags/interface/handler"
+	"github.com/ilhamtubagus/newsTags/utils"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -24,18 +25,9 @@ func init() {
 		log.Fatal(err)
 	}
 	// Postgres initialization
-	DSN := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s TimeZone=Asia/Jakarta",
-		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_NAME"), os.Getenv("DB_PASSWORD"))
-	dbClient, err = gorm.Open(postgres.New(postgres.Config{DSN: DSN}))
-	if err != nil {
-		log.Fatal(err)
-	}
+	dbClient = utils.GetDatabaseClient()
 	// Redis initialization
-	rdbClient = redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")),
-		Password: os.Getenv("REDIS_PASSWORD"), // no password set
-		DB:       0,                           // use default DB
-	})
+	rdbClient = utils.GetRedisClient()
 
 }
 func main() {
@@ -46,7 +38,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// Instantiate redis cacher
-	redis := persistence.NewRedisCacher(rdbClient)
+	redis := cache.NewRedisCacher(rdbClient)
 	// Instantiate Apps
 	tagApp := app.TagAppImpl{TagRepo: databaseServices.TagRepository}
 	topicApp := app.TopicAppImpl{TopicRepo: databaseServices.TopicRepository}
