@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/ilhamtubagus/newsTags/app"
 	"github.com/ilhamtubagus/newsTags/infrastructure/persistence"
 	"github.com/ilhamtubagus/newsTags/interface/handler"
@@ -15,27 +16,37 @@ import (
 )
 
 var dbClient *gorm.DB
+var rdbClient *redis.Client
 
 func init() {
-	if err := godotenv.Load(".env"); err != nil {
-		log.Fatal(err)
-	}
-	DSN := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s TimeZone=Asia/Jakarta",
-		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_NAME"), os.Getenv("DB_PASSWORD"))
-	postgresClient, err := gorm.Open(postgres.New(postgres.Config{DSN: DSN}))
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(err)
 	}
-	dbClient = postgresClient
+	// Postgres initialization
+	DSN := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s TimeZone=Asia/Jakarta",
+		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_NAME"), os.Getenv("DB_PASSWORD"))
+	dbClient, err = gorm.Open(postgres.New(postgres.Config{DSN: DSN}))
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Redis initialization
+	rdbClient = redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")),
+		Password: os.Getenv("REDIS_PASSWORD"), // no password set
+		DB:       0,                           // use default DB
+	})
 
 }
 func main() {
-	// Instantiate database repositories
+	// Instantiate postgres repositories
 	databaseServices := persistence.NewDatabaseRepositories(dbClient)
 	err := databaseServices.AutoMigrate()
 	if err != nil {
 		log.Fatal(err)
 	}
+	// Instantiate redis repositories
+	redisService := persistence.NewRedisCacher(rdbClient)
 	// Instantiate Apps
 	tagApp := app.TagAppImpl{TagRepo: databaseServices.TagRepository}
 	topicApp := app.TopicAppImpl{TopicRepo: databaseServices.TopicRepository}
@@ -43,7 +54,7 @@ func main() {
 	// Glue apps with handlers
 	tagHandler := handler.NewTagHandler(&tagApp)
 	topicHandler := handler.NewTopicHandler(&topicApp)
-	newsHandler := handler.NewNewsandler(&newsApp)
+	newsHandler := handler.NewNewsHandler(&newsApp, redisService)
 
 	// Define routes
 	e := echo.New()

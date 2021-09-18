@@ -30,9 +30,6 @@ services:
   redis:
     image: "redis:6.2.5-alpine3.14"
     container_name: "redis"
-    ports:
-      # Expose port 7001
-      - "${REDIS_PORT}:6379"
   # Postgres SQL DB
   postgres:
     image: "postgres:12.8-alpine3.14"
@@ -43,6 +40,6 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_DB: newsTopic
     ports:
-      - "5433:5432"
+      - "5433:${REDIS_PORT}"
 volumes:
   database-data:
