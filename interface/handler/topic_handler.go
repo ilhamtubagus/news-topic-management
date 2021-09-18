@@ -1,12 +1,12 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/ilhamtubagus/newsTags/app"
 	"github.com/ilhamtubagus/newsTags/domain/entity"
+	"github.com/ilhamtubagus/newsTags/interface/dto"
 	"github.com/labstack/echo/v4"
 )
 
@@ -27,18 +27,18 @@ func (th *TopicHandler) SaveTopic(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(err.Code, err.AsMessage())
 	}
-	return c.JSON(http.StatusCreated, topic)
+	return c.JSON(http.StatusCreated, dto.TopicDtoRes{Message: "topic created successfully", Topic: topic})
 }
 func (th *TopicHandler) GetTopicById(c echo.Context) error {
 	if id, err := strconv.ParseUint(c.Param("id"), 10, 32); err == nil {
-		tag, err := th.topicApp.GetTopicById(id)
+		topic, err := th.topicApp.GetTopicById(id)
 		if err != nil {
 			return echo.NewHTTPError(err.Code, err.AsMessage())
 
 		}
-		return c.JSON(http.StatusOK, tag)
+		return c.JSON(http.StatusOK, dto.TopicDtoRes{Message: "topic fetched successfully", Topic: topic})
 	}
-	return echo.NewHTTPError(http.StatusNotFound, "tag not found")
+	return echo.NewHTTPError(http.StatusNotFound, "topic not found")
 }
 func (th *TopicHandler) UpdateTopic(c echo.Context) error {
 	t := new(entity.Topic)
@@ -51,23 +51,25 @@ func (th *TopicHandler) UpdateTopic(c echo.Context) error {
 			return echo.NewHTTPError(err.Code, err.AsMessage())
 
 		}
-		fmt.Println("Shite")
 		topic.Topic = t.Topic
 		if _, err := th.topicApp.SaveTopic(topic); err != nil {
 			return echo.NewHTTPError(err.Code, err.AsMessage())
 		}
-		return c.JSON(http.StatusOK, topic)
+		return c.JSON(http.StatusOK, dto.TopicDtoRes{Message: "topic updated successfully", Topic: topic})
 	}
 	return echo.NewHTTPError(http.StatusNotFound, "topic not found")
 }
 func (th *TopicHandler) DeleteTopic(c echo.Context) error {
 	if id, err := strconv.ParseUint(c.Param("id"), 10, 32); err == nil {
-		tag, err := th.topicApp.GetTopicById(id)
+		topic, err := th.topicApp.GetTopicById(id)
 		if err != nil {
 			return echo.NewHTTPError(err.Code, err.AsMessage())
 		}
-		th.topicApp.DeleteTopic(tag.ID)
-		return c.JSON(http.StatusOK, map[string]string{"message": "topic deleted"})
+		err = th.topicApp.DeleteTopic(topic.ID)
+		if err != nil {
+			return echo.NewHTTPError(err.Code, err.AsMessage())
+		}
+		return c.JSON(http.StatusOK, dto.TopicDtoRes{Message: "topic deleted successfully"})
 	}
 	return echo.NewHTTPError(http.StatusNotFound, "topic not found")
 }
@@ -77,5 +79,5 @@ func (th *TopicHandler) GetAllTopic(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(err.Code, err.AsMessage())
 	}
-	return c.JSON(http.StatusOK, topics)
+	return c.JSON(http.StatusOK, dto.TopicsDtoRes{Message: "topic created successfully", Topics: &topics})
 }

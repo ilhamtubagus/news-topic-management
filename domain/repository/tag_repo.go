@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/ilhamtubagus/newsTags/app/dto"
 	"github.com/ilhamtubagus/newsTags/domain/entity"
+	"github.com/ilhamtubagus/newsTags/interface/dto"
 )
 
 type TagRepository interface {

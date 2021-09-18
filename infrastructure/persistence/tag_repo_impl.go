@@ -3,8 +3,8 @@ package persistence
 import (
 	"fmt"
 
-	"github.com/ilhamtubagus/newsTags/app/dto"
 	"github.com/ilhamtubagus/newsTags/domain/entity"
+	"github.com/ilhamtubagus/newsTags/interface/dto"
 	"gorm.io/gorm"
 )
 

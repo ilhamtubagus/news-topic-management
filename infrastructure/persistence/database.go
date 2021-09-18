@@ -17,5 +17,8 @@ func (d *DatabaseRepositories) AutoMigrate() error {
 	return d.db.AutoMigrate(&entity.Tag{}, &entity.News{}, &entity.Topic{})
 }
 func NewDatabaseRepositories(dbClient *gorm.DB) *DatabaseRepositories {
-	return &DatabaseRepositories{db: dbClient, TagRepository: NewTagRepository(dbClient), TopicRepository: NewTopicRepository((dbClient)), NewsRepository: NewNewsRepository(dbClient)}
+	return &DatabaseRepositories{db: dbClient,
+		TagRepository:   NewTagRepository(dbClient),
+		TopicRepository: NewTopicRepository((dbClient)),
+		NewsRepository:  NewNewsRepository(dbClient)}
 }

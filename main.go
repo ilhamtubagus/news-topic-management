@@ -49,17 +49,21 @@ func main() {
 	e := echo.New()
 	// Tag routes
 	e.POST("/tag", tagHandler.SaveTag)
-	e.PATCH("/tag/:id", tagHandler.UpdateTag)
+	e.PUT("/tag/:id", tagHandler.UpdateTag)
 	e.GET("/tag/:id", tagHandler.GetTagById)
 	e.DELETE("/tag/:id", tagHandler.DeleteTag)
 	e.GET("/tag", tagHandler.GetAllTag)
 	// Topic routes
 	e.POST("/topic", topicHandler.SaveTopic)
-	e.PATCH("/topic/:id", topicHandler.UpdateTopic)
+	e.PUT("/topic/:id", topicHandler.UpdateTopic)
 	e.GET("/topic/:id", topicHandler.GetTopicById)
 	e.DELETE("/topic/:id", topicHandler.DeleteTopic)
 	e.GET("/topic", topicHandler.GetAllTopic)
 	// News Routes
 	e.POST("/news", newsHandler.SaveNews)
+	e.GET("/news/:id", newsHandler.GetNewsById)
+	e.GET("/news", newsHandler.GetAllNews)
+	e.PUT("/news/:id", newsHandler.UpdateNews)
+	e.DELETE("/news/:id", newsHandler.DeleteNews)
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", os.Getenv("APP_PORT"))))
 }

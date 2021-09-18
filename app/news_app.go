@@ -1,13 +1,18 @@
 package app
 
 import (
-	"github.com/ilhamtubagus/newsTags/app/dto"
+	"time"
+
 	"github.com/ilhamtubagus/newsTags/domain/entity"
 	"github.com/ilhamtubagus/newsTags/domain/repository"
+	"github.com/ilhamtubagus/newsTags/interface/dto"
 )
 
 type NewsApp interface {
 	SaveNews(n *dto.NewsDto) (*entity.News, *dto.AppError)
+	GetNewsById(id uint64) (*entity.News, *dto.AppError)
+	GetAllNews(filter *dto.NewsFilter) (*[]entity.News, *dto.AppError)
+	DeleteNews(id uint64) (*entity.News, *dto.AppError)
 }
 type NewsAppImpl struct {
 	NewsRepo  repository.NewsRepository
@@ -16,6 +21,10 @@ type NewsAppImpl struct {
 }
 
 func (n NewsAppImpl) SaveNews(newsDto *dto.NewsDto) (*entity.News, *dto.AppError) {
+	//domain validation
+	if newsDto.Status != "draft" && newsDto.Status != "published" && newsDto.Status != "deleted" {
+		return nil, dto.NewBadRequestError("status not valid")
+	}
 	var tags []entity.Tag
 	for _, v := range newsDto.Tags {
 		tag, err := n.TagRepo.GetTagById(v)
@@ -31,11 +40,11 @@ func (n NewsAppImpl) SaveNews(newsDto *dto.NewsDto) (*entity.News, *dto.AppError
 	}
 	// instantiate news
 	news := entity.News{
+		ID:      newsDto.ID,
 		Title:   newsDto.Title,
 		Author:  newsDto.Author,
 		Status:  newsDto.Status,
 		Content: newsDto.Content,
-		Image:   newsDto.Image,
 		Topic:   topic,
 		Tags:    tags,
 	}
@@ -44,5 +53,24 @@ func (n NewsAppImpl) SaveNews(newsDto *dto.NewsDto) (*entity.News, *dto.AppError
 		return nil, err
 	}
 	return &news, nil
+}
 
+func (n NewsAppImpl) GetNewsById(id uint64) (*entity.News, *dto.AppError) {
+	return n.NewsRepo.GetNewsById(id)
+}
+func (n NewsAppImpl) GetAllNews(filter *dto.NewsFilter) (*[]entity.News, *dto.AppError) {
+	return n.NewsRepo.GetAllNews(filter)
+}
+func (n NewsAppImpl) DeleteNews(id uint64) (*entity.News, *dto.AppError) {
+	news, err := n.NewsRepo.GetNewsById(id)
+	if err != nil {
+		return nil, err
+	}
+	news.DeletedAt = time.Now()
+	news.Status = "deleted"
+	news, err = n.NewsRepo.SaveNews(news)
+	if err != nil {
+		return nil, err
+	}
+	return news, nil
 }

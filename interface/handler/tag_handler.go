@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/ilhamtubagus/newsTags/app"
-	"github.com/ilhamtubagus/newsTags/app/dto"
 	"github.com/ilhamtubagus/newsTags/domain/entity"
+	"github.com/ilhamtubagus/newsTags/interface/dto"
 	"github.com/labstack/echo/v4"
 )
 
@@ -27,7 +27,7 @@ func (th *TagHandler) SaveTag(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(err.Code, err.AsMessage())
 	}
-	return c.JSON(http.StatusCreated, tag)
+	return c.JSON(http.StatusCreated, dto.TagDtoRes{Message: "tag created successfully", Tag: tag})
 }
 
 func (th *TagHandler) GetTagById(c echo.Context) error {
@@ -37,7 +37,7 @@ func (th *TagHandler) GetTagById(c echo.Context) error {
 			return echo.NewHTTPError(err.Code, err.AsMessage())
 
 		}
-		return c.JSON(http.StatusOK, tag)
+		return c.JSON(http.StatusOK, dto.TagDtoRes{Message: "tag fetched successfully", Tag: tag})
 	}
 	return echo.NewHTTPError(http.StatusNotFound, "tag not found")
 }
@@ -57,7 +57,7 @@ func (th *TagHandler) UpdateTag(c echo.Context) error {
 		if _, err := th.tagApp.SaveTag(tag); err != nil {
 			return echo.NewHTTPError(err.Code, err.AsMessage())
 		}
-		return c.JSON(http.StatusOK, dto.TagDtoRes{Message: "tag updated", Tag: *tag})
+		return c.JSON(http.StatusOK, dto.TagDtoRes{Message: "tag updated successfully", Tag: tag})
 	}
 	return echo.NewHTTPError(http.StatusNotFound, "tag not found")
 }
@@ -68,8 +68,11 @@ func (th *TagHandler) DeleteTag(c echo.Context) error {
 		if err != nil {
 			return echo.NewHTTPError(err.Code, err.AsMessage())
 		}
-		th.tagApp.DeleteTag(tag.ID)
-		return c.JSON(http.StatusOK, map[string]string{"message": "tag deleted"})
+		err = th.tagApp.DeleteTag(tag.ID)
+		if err != nil {
+			return echo.NewHTTPError(err.Code, err.AsMessage())
+		}
+		return c.JSON(http.StatusOK, dto.TagDtoRes{Message: "tag deleted successfully"})
 	}
 	return echo.NewHTTPError(http.StatusNotFound, "tag not found")
 }
@@ -78,5 +81,5 @@ func (th *TagHandler) GetAllTag(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(err.Code, err.AsMessage())
 	}
-	return c.JSON(http.StatusOK, tags)
+	return c.JSON(http.StatusOK, dto.TagsDtoRes{Message: "tags fetched successfully", Tags: &tags})
 }
