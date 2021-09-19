@@ -40,6 +40,6 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_DB: newsTopic
     ports:
-      - "5433:${REDIS_PORT}"
+      - "5433:${DB_PORT}"
 volumes:
   database-data:
