@@ -1,9 +1,6 @@
 # Domain Driven Design Golang
 This project demonstrates how we can implement domain design approach in developing golang RESTful API. As described by Eric Evans in his book, Domain-Driven Design is an approach to software development that centers the development on programming a domain model that has a rich understanding of the processes and rules of a domain.
 
-## Purpose of This Project
-This project serves as an evaluation material in Bareksa Backend Home Test.
-
 ## Case Study
 - News and topic management.
 - CRUD on **news** and **tags**.
